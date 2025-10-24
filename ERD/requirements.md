@@ -90,17 +90,7 @@ Below is the ER diagram for the database design:
 
 ---
 
-## 5. Business Rules and Assumptions
-
-- A user can act as both guest and host.
-- Reviews only allowed after completed bookings.
-- Payments only made for confirmed bookings.
-- Booking status lifecycle is enforced.
-- Messages always have valid sender and recipient.
-
----
-
-## 6. Constraints and Data Integrity
+## 5. Constraints and Data Integrity
 
 ### User
 
@@ -130,7 +120,7 @@ Below is the ER diagram for the database design:
 
 ---
 
-## 7. Indexing
+## 6. Indexing
 
 | Table    | Index                   |
 | -------- | ----------------------- |
