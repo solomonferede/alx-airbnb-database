@@ -17,7 +17,7 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   phone_number VARCHAR(25),
   role role_enum NOT NULL DEFAULT 'guest',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 -------------------------------------------------------------
@@ -31,8 +31,8 @@ CREATE TABLE property (
   description TEXT NOT NULL,
   price_per_night NUMERIC(10,2) NOT NULL CHECK (price_per_night >= 0),
   currency CHAR(3) NOT NULL DEFAULT 'USD',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP
 );
 
 CREATE INDEX idx_property_host_id ON property(host_id);
@@ -61,10 +61,10 @@ CREATE TABLE booking (
     ON DELETE RESTRICT ON UPDATE CASCADE,
   user_id UUID NOT NULL REFERENCES users(user_id)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-  start_date DATE NOT NULL,
-  end_date DATE NOT NULL,
+  start_date TIMESTAMP NOT NULL,
+  end_date TIMESTAMP NOT NULL,
   status booking_status_enum NOT NULL DEFAULT 'pending',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
   CHECK (end_date > start_date)
 );
 
@@ -79,7 +79,7 @@ CREATE TABLE payment (
   booking_id UUID NOT NULL UNIQUE REFERENCES booking(booking_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   amount NUMERIC(10,2) NOT NULL CHECK (amount >= 0),
-  payment_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+  payment_date TIMESTAMP NOT NULL DEFAULT now(),
   payment_method payment_method_enum NOT NULL
 );
 
@@ -94,7 +94,7 @@ CREATE TABLE review (
     ON DELETE RESTRICT ON UPDATE CASCADE,
   rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_review_property_id ON review(property_id);
@@ -110,7 +110,7 @@ CREATE TABLE message (
   recipient_id UUID NOT NULL REFERENCES users(user_id)
     ON DELETE RESTRICT ON UPDATE CASCADE,
   message_body TEXT NOT NULL,
-  sent_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  sent_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_message_sender ON message(sender_id);
@@ -119,7 +119,7 @@ CREATE INDEX idx_message_sender_recipient_sent_at
   ON message(sender_id, recipient_id, sent_at);
 
 -------------------------------------------------------------
--- Convenience view: booking total price
+-- Convenience View
 -------------------------------------------------------------
 CREATE OR REPLACE VIEW booking_totals AS
 SELECT
@@ -128,7 +128,7 @@ SELECT
   b.user_id,
   b.start_date,
   b.end_date,
-  (p.price_per_night * (b.end_date - b.start_date))::NUMERIC(12,2)
+  (p.price_per_night * EXTRACT(EPOCH FROM (b.end_date - b.start_date)) / 86400)::NUMERIC(12,2)
     AS total_price
 FROM booking b
 JOIN property p USING (property_id);
