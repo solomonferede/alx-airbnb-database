@@ -10,4 +10,6 @@ SELECT
 FROM booking b
 LEFT JOIN users u ON b.user_id = u.user_id
 LEFT JOIN property p ON b.property_id = p.property_id
-LEFT JOIN payment pa ON b.booking_id = pa.booking_id;
+LEFT JOIN payment pa ON b.booking_id = pa.booking_id
+WHERE u.email = 'bob@example.com'
+  AND b.status = 'confirmed';
